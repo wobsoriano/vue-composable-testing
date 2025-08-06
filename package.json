@@ -1,22 +1,20 @@
 {
   "name": "vue-composable-testing",
-  "version": "0.1.6",
   "type": "module",
+  "version": "0.1.6",
+  "packageManager": "pnpm@9.7.0+sha512.dc09430156b427f5ecfc79888899e1c39d2d690f004be70e05230b72cb173d96839587545d09429b55ac3c429c801b4dc3c0e002f653830a420fa2dd4e3cf9cf",
   "description": "Test composables in Vue.",
+  "author": "Robert Soriano <sorianorobertc@gmail.com>",
+  "license": "MIT",
   "keywords": [
     "vue",
     "composition api",
     "composable",
     "testing"
   ],
-  "license": "MIT",
-  "author": "Robert Soriano <sorianorobertc@gmail.com>",
   "publishConfig": {
     "access": "public"
   },
-  "main": "./dist/index.js",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
   "exports": {
     "import": {
       "types": "./dist/index.d.ts",
@@ -27,6 +25,9 @@
       "default": "./dist/index.cjs"
     }
   },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "files": [
     "dist"
   ],
@@ -34,18 +35,21 @@
     "build": "tsdown src/index.ts",
     "test": "vitest run",
     "prepublishOnly": "pnpm run build",
-    "release": "bumpp"
+    "release": "bumpp",
+    "lint": "eslint",
+    "lint:fix": "eslint --fix"
   },
   "peerDependencies": {
     "vue": "^3.2.0"
   },
   "devDependencies": {
+    "@antfu/eslint-config": "^5.1.0",
     "bumpp": "^10.2.2",
+    "eslint": "^9.32.0",
     "jsdom": "^26.1.0",
     "tsdown": "^0.13.3",
     "typescript": "5.9.2",
     "vitest": "3.2.4",
     "vue": "^3.5.18"
-  },
-  "packageManager": "pnpm@9.7.0+sha512.dc09430156b427f5ecfc79888899e1c39d2d690f004be70e05230b72cb173d96839587545d09429b55ac3c429c801b4dc3c0e002f653830a420fa2dd4e3cf9cf"
+  }
 }

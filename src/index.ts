@@ -34,7 +34,8 @@ export function renderComposable<T>(composable: () => T, options: Options = {}):
     })
     const { unmount: unmountFn } = mount(Provider, { plugins: options.plugins })
     unmount = unmountFn
-  } else {
+  }
+  else {
     const { unmount: unmountFn } = mount(Comp, { plugins: options.plugins })
     unmount = unmountFn
   }
@@ -50,7 +51,7 @@ function mount<V extends Component>(Comp: V, options: { plugins?: Plugin[] } = {
   const app = createApp(Comp)
 
   if (options.plugins) {
-    options.plugins.forEach(plugin => {
+    options.plugins.forEach((plugin) => {
       app.use(plugin)
     })
   }

@@ -2,8 +2,9 @@
  * @vitest-environment jsdom
  */
 
+import type { Plugin } from 'vue'
 import { describe, expect, it, vi } from 'vitest'
-import { defineComponent, inject, onMounted, onUnmounted, provide, ref, type Plugin, type Ref } from 'vue'
+import { defineComponent, inject, onMounted, onUnmounted, provide, ref } from 'vue'
 import { renderComposable } from '..'
 
 describe('renderComposable', () => {
@@ -50,7 +51,7 @@ describe('renderComposable', () => {
       wrapper: defineComponent((_, { slots }) => {
         provide('test', 'value')
         return () => slots.default?.()
-      })
+      }),
     })
     expect(result.injected).toBe('value')
   })
@@ -59,7 +60,7 @@ describe('renderComposable', () => {
     const plugin: Plugin = {
       install(app) {
         app.provide('count', 10)
-      }
+      },
     }
 
     function useCounter() {
@@ -70,7 +71,7 @@ describe('renderComposable', () => {
     }
 
     const { result } = renderComposable(() => useCounter(), {
-      plugins: [plugin]
+      plugins: [plugin],
     })
     expect(result.count).toBe(10)
   })
