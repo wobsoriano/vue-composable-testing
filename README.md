@@ -1,19 +1,14 @@
-# vue-test-composables
+# vue-composable-testing
 
-[![Build Size](https://img.shields.io/bundlephobia/minzip/vue-test-composables?label=bundle%20size&style=flat&colorA=000000&colorB=000000)](https://bundlephobia.com/result?p=vue-test-composables)
-[![Version](https://img.shields.io/npm/v/vue-test-composables?style=flat&colorA=000000&colorB=000000)](https://www.npmjs.com/package/vue-test-composables)
+Simple composable testing utility for Vue.
 
-Test composables in Vue 2 and 3.
-
-## Installation:
+## Installation
 
 ```bash
-pnpm add vue-test-composables -D
+npm install vue-composable-testing --save-dev
 ```
 
-If your app is using Vue 2, you also need to install the composition api: `@vue/composition-api`.
-
-### Basic usage
+## Basic Usage
 
 A simple counter composable:
 
@@ -37,7 +32,7 @@ export function useCounter() {
 To test, render it using the `renderComposable` function provided by the library:
 
 ```ts
-import { renderComposable } from 'vue-test-composables'
+import { renderComposable } from 'vue-composable-testing'
 import { useCounter } from './counter'
 
 test('should increment count', () => {
@@ -49,51 +44,67 @@ test('should increment count', () => {
 })
 ```
 
-You can unmount the underlying component by using unmount helper returned by mount to trigger onUnmounted and related lifecycle hooks:
+You can unmount the underlying component by using the unmount helper returned by `renderComposable` to trigger `onUnmounted` and related lifecycle hooks:
 
 ```ts
 const { result, unmount } = renderComposable(() => useCounter())
 
-// Unmount underlying comonent to trigger lifecycle hooks
+// Unmount underlying component to trigger lifecycle hooks
 unmount()
 ```
 
-### Provide/Inject
+## Plugins
 
-Example using [vue-query](https://github.com/DamianOsipiuk/vue-query)
+You can pass Vue plugins to the composable test environment using the `plugins` option:
 
 ```ts
-import { useQuery, useQueryProvider } from 'vue-query'
-import { renderComposable } from 'vue-test-composables'
+import { createPinia } from 'pinia'
+import { renderComposable } from 'vue-composable-testing'
 
-function useUser() {
-  return useQuery('user', () =>
-    fetch('/api/user').then(
-      res => res.json,
-    ),
-  )
+function useStore() {
+  const store = useMyStore()
+  return {
+    store,
+  }
 }
 
-test('useUser', async() => {
-  const { result, waitFor } = renderComposable(() => useUser(), {
-    provider() {
-      useQueryProvider()
-    },
+test('useStore with Pinia', () => {
+  const pinia = createPinia()
+  const { result } = renderComposable(() => useStore(), {
+    plugins: [pinia],
   })
 
-  await waitFor(() => result.isSuccess.value)
-
-  await expect(result.data.value).resolves.toMatchObject({
-    id: 1,
-    username: 'johndoe',
-    email: 'johndoe@mail.com',
-  })
+  expect(result.store).toBeDefined()
 })
 ```
 
-## Credits
+## Provide/Inject
 
-This is a fork of [vue-composable-tester](https://github.com/ktsn/vue-composable-tester) with some modifications using [vue-demi](https://github.com/vueuse/vue-demi/).
+Often, a composable needs values from context. You can use the `wrapper` option to wrap the underlying component with a Provider component:
+
+```ts
+import { defineComponent, inject, provide } from 'vue'
+import { renderComposable } from 'vue-composable-testing'
+
+function useUser() {
+  const injected = inject('user')
+  return {
+    injected,
+  }
+}
+
+test('useUser', () => {
+  const { result } = renderComposable(() => useUser(), {
+    wrapper: defineComponent((_, { slots }) => {
+      provide('user', 'John Doe')
+      // Always return a default slot to render the composable
+      return () => slots.default?.()
+    }),
+  })
+
+  expect(result.injected).toBe('John Doe')
+})
+```
 
 ## License
 

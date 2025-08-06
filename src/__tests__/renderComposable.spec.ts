@@ -1,10 +1,10 @@
 /**
- * @vitest-environment happy-dom
+ * @vitest-environment jsdom
  */
 
 import { describe, expect, it, vi } from 'vitest'
-import { inject, onMounted, onUnmounted, provide, ref } from 'vue-demi'
-import { renderComposable } from '../index'
+import { defineComponent, inject, onMounted, onUnmounted, provide, ref, type Plugin, type Ref } from 'vue'
+import { renderComposable } from '..'
 
 describe('renderComposable', () => {
   it('returns the result of passed composable', () => {
@@ -38,7 +38,7 @@ describe('renderComposable', () => {
     expect(spy).toHaveBeenCalled()
   })
 
-  it('allows to provide a value', () => {
+  it('allows to provide a wrapper', () => {
     function useTest() {
       const injected = inject('test')
       return {
@@ -47,10 +47,31 @@ describe('renderComposable', () => {
     }
 
     const { result } = renderComposable(() => useTest(), {
-      provider: () => {
+      wrapper: defineComponent((_, { slots }) => {
         provide('test', 'value')
-      },
+        return () => slots.default?.()
+      })
     })
     expect(result.injected).toBe('value')
+  })
+
+  it('allows to use plugins', () => {
+    const plugin: Plugin = {
+      install(app) {
+        app.provide('count', 10)
+      }
+    }
+
+    function useCounter() {
+      const count = inject<number>('count')!
+      return {
+        count,
+      }
+    }
+
+    const { result } = renderComposable(() => useCounter(), {
+      plugins: [plugin]
+    })
+    expect(result.count).toBe(10)
   })
 })

@@ -1,81 +1,62 @@
-/* eslint-disable vue/one-component-per-file */
-import { Vue2, createApp, defineComponent, h, isVue2 } from 'vue-demi'
-import waitFor from 'p-wait-for'
+import type { Component, Plugin } from 'vue'
+import { createApp, defineComponent, h } from 'vue'
 
-export interface MountResult<T> {
+type InstanceType<V> = V extends { new (...arg: any[]): infer X } ? X : never
+type VM<V> = InstanceType<V> & { unmount: () => void }
+
+export interface RenderComposableResult<T> {
   result: T
   unmount: () => void
-  waitFor: typeof waitFor
 }
 
-export interface MountOptions {
-  provider?: () => void
+export interface Options {
+  wrapper?: Component
+  plugins?: Plugin[]
 }
 
-export function renderComposable<T>(
-  composable: () => T,
-  options: MountOptions = {},
-): MountResult<T> {
-  return isVue2
-    ? mountVue2(composable, options)
-    : mountVue3(composable, options)
-}
-
-function mountVue2<T>(
-  composable: () => T,
-  options: MountOptions,
-): MountResult<T> {
-  const app = new Vue2({
+export function renderComposable<T>(composable: () => T, options: Options = {}): RenderComposableResult<T> {
+  let result!: T
+  const Comp = defineComponent({
     setup() {
-      options.provider?.()
+      result = composable()
 
-      const result = composable()
-      const wrapper = () => result
-      return { wrapper }
+      return () => null
     },
-
-    render() {},
   })
 
-  app.$mount()
+  let unmount: () => void
+
+  if (options.wrapper) {
+    const Provider = defineComponent({
+      setup() {
+        return () => h(options.wrapper!, () => h(Comp))
+      },
+    })
+    const { unmount: unmountFn } = mount(Provider, { plugins: options.plugins })
+    unmount = unmountFn
+  } else {
+    const { unmount: unmountFn } = mount(Comp, { plugins: options.plugins })
+    unmount = unmountFn
+  }
 
   return {
-    result: app.wrapper(),
-    unmount: () => app.$destroy(),
-    waitFor,
+    result,
+    unmount,
   }
 }
 
-function mountVue3<T>(
-  composable: () => T,
-  options: MountOptions,
-): MountResult<T> {
-  const Child = defineComponent({
-    setup() {
-      const result = composable()
-      const wrapper = () => result
-      return { wrapper }
-    },
-    // eslint-disable-next-line vue/require-render-return
-    render() {},
-  })
+function mount<V extends Component>(Comp: V, options: { plugins?: Plugin[] } = {}) {
+  const el = document.createElement('div')
+  const app = createApp(Comp)
 
-  const App = defineComponent({
-    setup() {
-      options.provider?.()
-    },
-    render() {
-      return h(Child, { ref: 'child' })
-    },
-  })
-
-  const root = document.createElement('div')
-  const app = createApp(App)
-  const vm = app.mount(root)
-
-  return {
-    result: (vm.$refs.child as any).wrapper(),
-    unmount: () => app.unmount(),
-    waitFor,
+  if (options.plugins) {
+    options.plugins.forEach(plugin => {
+      app.use(plugin)
+    })
   }
+
+  const unmount = () => app.unmount()
+  const comp = app.mount(el) as any as VM<V>
+  comp.unmount = unmount
+  return comp
 }
