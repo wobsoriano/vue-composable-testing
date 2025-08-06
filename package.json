@@ -31,7 +31,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsdown src/index.ts --format cjs,esm",
+    "build": "tsdown src/index.ts",
     "test": "vitest run",
     "prepublishOnly": "pnpm run build",
     "release": "bumpp"
