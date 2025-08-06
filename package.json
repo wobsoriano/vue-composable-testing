@@ -1,79 +1,55 @@
 {
-  "name": "vue-test-composables",
+  "name": "vue-composable-testing",
+  "type": "module",
   "version": "0.1.6",
-  "description": "Test composables in Vue 2 and 3.",
+  "packageManager": "pnpm@9.7.0+sha512.dc09430156b427f5ecfc79888899e1c39d2d690f004be70e05230b72cb173d96839587545d09429b55ac3c429c801b4dc3c0e002f653830a420fa2dd4e3cf9cf",
+  "description": "Test composables in Vue.",
+  "author": "Robert Soriano <sorianorobertc@gmail.com>",
+  "license": "MIT",
   "keywords": [
     "vue",
     "composition api",
     "composable",
     "testing"
   ],
-  "license": "MIT",
-  "author": "Robert Soriano <sorianorobertc@gmail.com>",
   "publishConfig": {
     "access": "public"
   },
-  "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
-  "types": "./dist/index.d.ts",
   "exports": {
-    "require": "./dist/index.js",
-    "import": "./dist/index.mjs"
+    "import": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "require": {
+      "types": "./dist/index.d.cts",
+      "default": "./dist/index.cjs"
+    }
   },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "files": [
     "dist"
   ],
   "scripts": {
-    "build-fast": "tsup src/index.ts --format cjs,esm",
-    "build": "pnpm run build-fast --dts-resolve",
-    "test": "pnpm run test:2 && pnpm run test:3",
-    "test:2": "vue-demi-switch 2 vue2 && vitest run",
-    "test:3": "vue-demi-switch 3 && vitest run",
+    "build": "tsdown src/index.ts",
+    "test": "vitest run",
     "prepublishOnly": "pnpm run build",
-    "release": "bumpp --commit --push --tag && pnpm publish",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "release": "bumpp",
+    "lint": "eslint",
+    "lint:fix": "eslint --fix"
   },
   "peerDependencies": {
-    "@vue/composition-api": "^1.4.0",
-    "vue": "^2.6.14 || ^3.2.0"
-  },
-  "peerDependenciesMeta": {
-    "@vue/composition-api": {
-      "optional": true
-    }
-  },
-  "dependencies": {
-    "p-wait-for": "^5.0.0",
-    "vue-demi": "^0.13.11"
+    "vue": "^3.2.0"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^0.34.0",
-    "@vue/composition-api": "^1.7.1",
-    "bumpp": "^8.2.1",
-    "eslint": "^8.31.0",
-    "happy-dom": "^8.1.1",
-    "lint-staged": "^13.1.0",
-    "simple-git-hooks": "^2.8.1",
-    "tsup": "6.5.0",
-    "typescript": "4.9.4",
-    "vitest": "0.26.3",
-    "vue": "^3.2.45",
-    "vue2": "npm:vue@2"
-  },
-  "lint-staged": {
-    "{src,test}/**/*.{js,ts}": [
-      "eslint --fix"
-    ]
-  },
-  "eslintConfig": {
-    "extends": "@antfu"
-  },
-  "eslintIgnore": [
-    "dist",
-    "node_modules"
-  ],
-  "simple-git-hooks": {
-    "pre-commit": "npx lint-staged"
+    "@antfu/eslint-config": "^5.1.0",
+    "bumpp": "^10.2.2",
+    "eslint": "^9.32.0",
+    "jsdom": "^26.1.0",
+    "tsdown": "^0.13.3",
+    "typescript": "5.9.2",
+    "vitest": "3.2.4",
+    "vue": "^3.5.18"
   }
 }
